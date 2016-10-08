@@ -1,0 +1,88 @@
+buildscript {
+    ext {
+        springBootVersion = '1.4.1.RELEASE'
+    }
+    ext['elasticsearch.version'] = '2.3.4'
+    repositories {
+        maven { url 'http://repo.spring.io/plugins-release' }
+        mavenCentral()
+        maven { url "https://plugins.gradle.org/m2/" }
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+        //to make custom dependencies configs
+        classpath 'org.springframework.build.gradle:propdeps-plugin:0.0.7'
+
+        //to use tw artifactory
+        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4.4.0"
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'groovy'
+apply plugin: 'idea'
+apply plugin: 'spring-boot'
+//to make custom dependencies configs
+apply plugin: 'propdeps'
+apply plugin: 'propdeps-maven'
+apply plugin: 'propdeps-idea'
+apply plugin: 'com.jfrog.artifactory'
+
+jar {
+    baseName = 'dependency-injection-spring-example'
+    version = '0.0.1-SNAPSHOT'
+}
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+repositories {
+    jcenter()
+    mavenCentral()
+}
+
+configurations.all {
+    exclude group: 'ch.qos.logback', module: 'logback-classic'
+}
+
+dependencies {
+    ext {
+        spock_version = '1.0-groovy-2.4'
+        cglib_version = '3.2.2'
+        jersey_test_grizzly_version = '2.22.1'
+        swagger_version = '1.5.10'
+        swagger_ui_version = '2.2.2'
+        orika_version = '1.4.6'
+        javassist_version = '3.20.0-GA'
+        rest_assured_version = '3.0.1'
+        apache_commons_version = '3.4'
+        spring_data_elasticsearch_version = "2.0.3.RELEASE"
+
+    }
+    //spring boot dependencies
+
+    compile(
+            "org.springframework.boot:spring-boot-starter-jersey",
+            "org.springframework.boot:spring-boot-starter-web",
+            "org.apache.commons:commons-lang3:$apache_commons_version",
+            "ma.glasnost.orika:orika-core:$orika_version",
+            "org.springframework.boot:spring-boot-starter-log4j2",
+            "io.swagger:swagger-jersey2-jaxrs:$swagger_version",
+            "org.webjars:swagger-ui:$swagger_ui_version",
+            "org.javassist:javassist:$javassist_version",
+            "com.fasterxml.jackson.datatype:jackson-datatype-jsr310"
+    )
+
+    runtime("net.java.dev.jna:jna")
+
+    //spring boot annotation processor
+    optional("org.springframework.boot:spring-boot-configuration-processor")
+    testCompile(
+            "org.springframework.boot:spring-boot-starter-test",
+            "org.spockframework:spock-spring:$spock_version",
+            "cglib:cglib-nodep:$cglib_version", // for stubbing of classes
+            "org.glassfish.jersey.test-framework.providers:jersey-test-framework-provider-grizzly2:$jersey_test_grizzly_version",
+            "io.rest-assured:rest-assured:$rest_assured_version"
+    )
+}
+
+compileJava.dependsOn(processResources)//to make custom dependencies configs
